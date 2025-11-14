@@ -1,0 +1,6 @@
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\bin\Release\net6.0\AutolootMod.deps.json
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\bin\Release\net6.0\AutolootMod.dll
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\AutolootMod.csproj.AssemblyReference.cache
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\AutolootMod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\AutolootMod.csproj.CoreCompileInputs.cache
+C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\AutolootMod.dll
