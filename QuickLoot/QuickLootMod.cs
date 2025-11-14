@@ -33,7 +33,7 @@ namespace QuickLootMod {
         /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unlike Entry, which is only called once per mod).</summary>
         private void OnGameLaunched(object sender, StardewModdingAPI.Events.GameLaunchedEventArgs e) {
             // Check if ConvenientInventory is loaded for favorite item support
-            isConvenientInventoryLoaded = Helper.ModRegistry.IsLoaded("alanperrow.ConvenientInventory");
+            isConvenientInventoryLoaded = Helper.ModRegistry.IsLoaded("gaussfire.ConvenientInventory");
             if (isConvenientInventoryLoaded) {
                 try {
                     var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -45,14 +45,24 @@ namespace QuickLootMod {
                             convenientInventoryModEntryType = assembly.GetType("ConvenientInventory.ModEntry");
                         }
                         if (convenientInventoryType != null && convenientInventoryModEntryType != null) {
+                            // Test that we can access the FavoriteItemSlots property
+                            var testProperty = convenientInventoryType.GetProperty("FavoriteItemSlots", BindingFlags.Public | BindingFlags.Static);
+                            if (testProperty != null) {
+                                Monitor.Log("Successfully found ConvenientInventory.FavoriteItemSlots property", StardewModdingAPI.LogLevel.Trace);
+                            } else {
+                                Monitor.Log("Could not find ConvenientInventory.FavoriteItemSlots property", StardewModdingAPI.LogLevel.Warn);
+                            }
                             break;
                         }
                     }
-                } catch {
+                } catch (Exception ex) {
                     // If reflection fails, we'll just skip favorite checking
+                    Monitor.Log($"Failed to load ConvenientInventory types: {ex.Message}", StardewModdingAPI.LogLevel.Warn);
                     convenientInventoryType = null;
                     convenientInventoryModEntryType = null;
                 }
+            } else {
+                Monitor.Log("ConvenientInventory is not loaded, favorite item support disabled", StardewModdingAPI.LogLevel.Trace);
             }
             
             // Register Generic Mod Config Menu integration if available
@@ -127,19 +137,25 @@ namespace QuickLootMod {
 
         /// <summary>Perform the quick stow action - transfers items from player inventory to the opened chest.</summary>
         private void PerformStow() {
+            Monitor.Log("PerformStow called", StardewModdingAPI.LogLevel.Info);
+            
             // Only work when a chest menu is open
             if (menu == null || IsCJBItemSpawnerMenu(menu)) {
+                Monitor.Log("Menu is null or CJB menu, returning", StardewModdingAPI.LogLevel.Info);
                 return;
             }
 
             // Get the chest from the menu context
             Chest chest = menu.context as Chest;
             if (chest == null) {
+                Monitor.Log("Chest is null, returning", StardewModdingAPI.LogLevel.Info);
                 return;
             }
 
             var playerInventory = Game1.player.Items;
             bool movedAtLeastOne = false;
+            
+            Monitor.Log($"Processing {playerInventory.Count} inventory items. ConvenientInventory loaded: {isConvenientInventoryLoaded}", StardewModdingAPI.LogLevel.Info);
             
             // Create a copy of the inventory list to iterate over (since we'll be modifying it)
             var itemsToProcess = new List<Item>();
@@ -151,6 +167,8 @@ namespace QuickLootMod {
                 }
             }
             
+            Monitor.Log($"Found {itemsToProcess.Count} non-null items to process", StardewModdingAPI.LogLevel.Info);
+            
             // Iterate through player inventory and transfer items to chest
             for (int idx = 0; idx < itemsToProcess.Count; idx++) {
                 Item item = itemsToProcess[idx];
@@ -161,11 +179,15 @@ namespace QuickLootMod {
                 // Get the current index of the item in the inventory (may have changed)
                 int currentInventoryIndex = playerInventory.IndexOf(item);
                 if (currentInventoryIndex == -1) {
+                    Monitor.Log($"Item {item.Name} no longer in inventory, skipping", StardewModdingAPI.LogLevel.Info);
                     continue; // Item no longer in inventory
                 }
                 
                 // Check if item is favorited (skip if favorited)
-                if (IsItemFavorited(currentInventoryIndex)) {
+                bool isFavorited = IsItemFavorited(currentInventoryIndex);
+                Monitor.Log($"Item {item.Name} at slot {currentInventoryIndex}: isFavorited={isFavorited}", StardewModdingAPI.LogLevel.Info);
+                if (isFavorited) {
+                    Monitor.Log($"Skipping favorited item {item.Name} at slot {currentInventoryIndex}", StardewModdingAPI.LogLevel.Info);
                     continue;
                 }
 
@@ -197,37 +219,82 @@ namespace QuickLootMod {
         /// <param name="inventoryIndex">The index in the player's inventory.</param>
         /// <returns>True if the item is favorited, false otherwise.</returns>
         private bool IsItemFavorited(int inventoryIndex) {
+            Monitor.Log($"IsItemFavorited called for slot {inventoryIndex}", StardewModdingAPI.LogLevel.Info);
+            
             if (!isConvenientInventoryLoaded || convenientInventoryType == null || convenientInventoryModEntryType == null) {
+                Monitor.Log("ConvenientInventory not loaded or types not found", StardewModdingAPI.LogLevel.Info);
                 return false;
             }
 
             try {
                 // First check if favorites are enabled in ConvenientInventory's config
                 var configProperty = convenientInventoryModEntryType.GetProperty("Config", BindingFlags.Public | BindingFlags.Static);
-                if (configProperty != null) {
-                    var config = configProperty.GetValue(null);
-                    if (config != null) {
-                        var isEnableFavoriteItemsProperty = config.GetType().GetProperty("IsEnableFavoriteItems");
-                        if (isEnableFavoriteItemsProperty != null) {
-                            bool favoritesEnabled = (bool)isEnableFavoriteItemsProperty.GetValue(config);
-                            if (!favoritesEnabled) {
-                                return false; // Favorites are disabled in ConvenientInventory
-                            }
-                        }
-                    }
+                if (configProperty == null) {
+                    Monitor.Log("Could not find ModEntry.Config property", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                var config = configProperty.GetValue(null);
+                if (config == null) {
+                    Monitor.Log("ModEntry.Config is null", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                var isEnableFavoriteItemsProperty = config.GetType().GetProperty("IsEnableFavoriteItems");
+                if (isEnableFavoriteItemsProperty == null) {
+                    Monitor.Log("Could not find IsEnableFavoriteItems property", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                bool favoritesEnabled = (bool)isEnableFavoriteItemsProperty.GetValue(config);
+                Monitor.Log($"Favorites enabled in ConvenientInventory: {favoritesEnabled}", StardewModdingAPI.LogLevel.Info);
+                if (!favoritesEnabled) {
+                    Monitor.Log("Favorites are disabled in ConvenientInventory config", StardewModdingAPI.LogLevel.Info);
+                    return false; // Favorites are disabled in ConvenientInventory
                 }
 
                 // Get the FavoriteItemSlots property from ConvenientInventory
+                // This is a PerScreen<bool[]> property, so we need to call the getter
                 var favoriteItemSlotsProperty = convenientInventoryType.GetProperty("FavoriteItemSlots", BindingFlags.Public | BindingFlags.Static);
-                if (favoriteItemSlotsProperty != null) {
-                    var favoriteItemSlots = favoriteItemSlotsProperty.GetValue(null) as bool[];
-                    if (favoriteItemSlots != null && inventoryIndex >= 0 && inventoryIndex < favoriteItemSlots.Length) {
-                        return favoriteItemSlots[inventoryIndex];
-                    }
+                if (favoriteItemSlotsProperty == null) {
+                    Monitor.Log("Could not find FavoriteItemSlots property", StardewModdingAPI.LogLevel.Warn);
+                    return false;
                 }
+                
+                // Call the property getter to get the actual bool[] array
+                // The getter will initialize the array if needed
+                object propertyValue = favoriteItemSlotsProperty.GetValue(null);
+                if (propertyValue == null) {
+                    Monitor.Log("FavoriteItemSlots property getter returned null", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                bool[] favoriteItemSlots = propertyValue as bool[];
+                if (favoriteItemSlots == null) {
+                    Monitor.Log($"FavoriteItemSlots property returned non-array type: {propertyValue.GetType().FullName}", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                Monitor.Log($"FavoriteItemSlots array length: {favoriteItemSlots.Length}, checking index {inventoryIndex}", StardewModdingAPI.LogLevel.Info);
+                
+                // Ensure the array is large enough and the index is valid
+                if (inventoryIndex < 0) {
+                    Monitor.Log($"Invalid inventory index: {inventoryIndex}", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                if (inventoryIndex >= favoriteItemSlots.Length) {
+                    Monitor.Log($"Inventory index {inventoryIndex} out of range for FavoriteItemSlots array (length: {favoriteItemSlots.Length})", StardewModdingAPI.LogLevel.Warn);
+                    return false;
+                }
+                
+                bool isFavorited = favoriteItemSlots[inventoryIndex];
+                Monitor.Log($"Favorite status for slot {inventoryIndex}: {isFavorited} (array length: {favoriteItemSlots.Length})", StardewModdingAPI.LogLevel.Info);
+                return isFavorited;
+                
             } catch (Exception ex) {
                 // If reflection fails, log and assume not favorited
-                Monitor.Log($"Failed to check favorite status: {ex.Message}", StardewModdingAPI.LogLevel.Debug);
+                Monitor.Log($"Failed to check favorite status for slot {inventoryIndex}: {ex.Message}\n{ex.StackTrace}", StardewModdingAPI.LogLevel.Error);
             }
 
             return false;
