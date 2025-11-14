@@ -1,0 +1,17 @@
+{
+  "ModConfigMenu.Label.Options": "Options",
+  "ModConfigMenu.Label.Controls": "Controls",
+  
+  "ModConfigMenu.CloseMenuAfterLoot.Name": "Close Menu After Loot",
+  "ModConfigMenu.CloseMenuAfterLoot.Desc": "Automatically close the chest menu once you've grabbed everything. Saves you a click!",
+  
+  "ModConfigMenu.LootHotkey.Name": "Loot Hotkey",
+  "ModConfigMenu.LootHotkey.Desc": "Press this key to instantly grab all items from a chest.",
+  
+  "ModConfigMenu.UseQuickStowHotkey.Name": "Use Quick Stow Hotkey",
+  "ModConfigMenu.UseQuickStowHotkey.Desc": "Enable this to quickly dump your inventory into chests. Your favorited items will stay safe in your inventory.",
+  
+  "ModConfigMenu.QuickStowHotkey.Name": "Quick Stow Hotkey",
+  "ModConfigMenu.QuickStowHotkey.Desc": "The key(s) to press for quick stowing items from inventory to chest. Default is L. Only works when a chest menu is open. Supports key combinations (e.g., Ctrl+L) and controller buttons."
+}
+

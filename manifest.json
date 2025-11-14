@@ -1,0 +1,10 @@
+{
+    "Name": "Quick Loot",
+    "Author": "JennaJuffuffles",
+    "Version": "1.0.0",
+    "Description": "Quickly loot all items from chests and containers. Features configurable hotkey and auto-close option.",
+    "UniqueID": "QuickLootMod",
+    "EntryDll": "QuickLootMod.dll",
+    "MinimumApiVersion": "4.0.0",
+    "UpdateKeys": []
+}
