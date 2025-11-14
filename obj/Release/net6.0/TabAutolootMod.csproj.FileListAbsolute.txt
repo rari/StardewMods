@@ -1,6 +1,0 @@
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\TabAutolootMod.csproj.AssemblyReference.cache
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\TabAutolootMod.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\TabAutolootMod.csproj.CoreCompileInputs.cache
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\bin\Release\net6.0\TabAutolootMod.deps.json
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\bin\Release\net6.0\TabAutolootMod.dll
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Tab Autoloot\obj\Release\net6.0\TabAutolootMod.dll

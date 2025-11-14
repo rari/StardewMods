@@ -1,6 +1,0 @@
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\bin\Release\net6.0\QuickLootMod.deps.json
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\bin\Release\net6.0\QuickLootMod.dll
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\obj\Release\net6.0\QuickLootMod.csproj.AssemblyReference.cache
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\obj\Release\net6.0\QuickLootMod.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\obj\Release\net6.0\QuickLootMod.csproj.CoreCompileInputs.cache
-C:\Users\imiko\OneDrive\Documents\Mods\C#\Quick Loot\obj\Release\net6.0\QuickLootMod.dll
